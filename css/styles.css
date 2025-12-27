@@ -1245,3 +1245,420 @@ body {
     color: var(--text-secondary);
     margin-top: var(--space-md);
 }
+
+/* ==================== PHASE 3: SABOTAGE SYSTEM ==================== */
+
+/* Sabotage Shop */
+.sabotage-shop {
+    margin-top: var(--space-xl);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    backdrop-filter: blur(10px);
+}
+
+.shop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.shop-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.chaos-points {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: linear-gradient(135deg, hsla(280, 100%, 50%, 0.2), hsla(340, 100%, 50%, 0.2));
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    border: 1px solid hsla(280, 100%, 60%, 0.3);
+}
+
+.chaos-icon {
+    font-size: 1rem;
+    animation: chaosFloat 2s ease-in-out infinite;
+}
+
+@keyframes chaosFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-2px) rotate(10deg);
+    }
+}
+
+.chaos-value {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-secondary);
+}
+
+.chaos-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* Shop Items Grid */
+.shop-items {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+}
+
+@media (max-width: 400px) {
+    .shop-items {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Sabotage Button */
+.sabotage-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm);
+    background: var(--bg-tertiary);
+    border: 2px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.sabotage-btn:hover:not(:disabled) {
+    border-color: var(--accent-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px hsla(280, 100%, 50%, 0.2);
+}
+
+.sabotage-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.sabotage-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.sabotage-btn.affordable {
+    border-color: hsla(150, 80%, 45%, 0.5);
+}
+
+.sabotage-btn.affordable:hover {
+    border-color: var(--accent-success);
+    box-shadow: 0 4px 15px hsla(150, 80%, 45%, 0.3);
+}
+
+.sabotage-emoji {
+    font-size: 1.5rem;
+}
+
+.sabotage-name {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.sabotage-cost {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--accent-secondary);
+}
+
+.sabotage-cost::before {
+    content: '💀';
+    font-size: 0.6rem;
+}
+
+/* Active Effects Indicator */
+.active-effects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    justify-content: center;
+    margin-top: var(--space-md);
+    min-height: 24px;
+}
+
+.effect-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: hsla(0, 85%, 55%, 0.2);
+    border: 1px solid var(--accent-danger);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    color: var(--accent-danger);
+    animation: effectPulse 1s ease-in-out infinite;
+}
+
+@keyframes effectPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.effect-badge .effect-emoji {
+    font-size: 0.8rem;
+}
+
+/* ==================== SABOTAGE EFFECT STYLES ==================== */
+
+/* Flashbang Overlay */
+.flashbang-overlay {
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 3000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s ease;
+}
+
+.flashbang-overlay.active {
+    opacity: 1;
+    animation: flashbangFade 2s ease-out forwards;
+    pointer-events: auto;
+}
+
+@keyframes flashbangFade {
+    0% {
+        opacity: 1;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Blackout Overlay */
+.blackout-overlay {
+    position: fixed;
+    inset: 0;
+    background: black;
+    z-index: 3000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.blackout-overlay.active {
+    opacity: 0.95;
+    pointer-events: auto;
+    animation: blackoutFlicker 0.5s ease infinite;
+}
+
+@keyframes blackoutFlicker {
+
+    0%,
+    100% {
+        opacity: 0.95;
+    }
+
+    50% {
+        opacity: 0.85;
+    }
+}
+
+/* Earthquake Effect */
+.effect-earthquake {
+    animation: earthquakeShake 0.1s ease-in-out infinite;
+}
+
+@keyframes earthquakeShake {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    25% {
+        transform: translate(-5px, 3px) rotate(-1deg);
+    }
+
+    50% {
+        transform: translate(5px, -3px) rotate(1deg);
+    }
+
+    75% {
+        transform: translate(-3px, -5px) rotate(-0.5deg);
+    }
+
+    100% {
+        transform: translate(3px, 5px) rotate(0.5deg);
+    }
+}
+
+/* Drunk Mode Effect */
+.effect-drunk {
+    filter: blur(4px);
+    transform: rotate(5deg) !important;
+    transition: all 0.3s ease;
+}
+
+.effect-drunk-screen {
+    animation: drunkSway 2s ease-in-out infinite;
+}
+
+@keyframes drunkSway {
+
+    0%,
+    100% {
+        transform: rotate(-1deg) translateX(-5px);
+    }
+
+    50% {
+        transform: rotate(1deg) translateX(5px);
+    }
+}
+
+/* Reverse Effect */
+.effect-reverse {
+    direction: rtl;
+    border-color: var(--accent-warning) !important;
+    box-shadow: 0 0 20px hsla(40, 100%, 55%, 0.3) !important;
+}
+
+.effect-reverse::placeholder {
+    direction: ltr;
+}
+
+/* Tiny Text Effect */
+.effect-tiny {
+    font-size: 0.5rem !important;
+    letter-spacing: 0.1em;
+    padding: var(--space-xl) var(--space-lg) !important;
+}
+
+/* Sabotage Incoming Toast */
+.sabotage-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, hsla(280, 100%, 50%, 0.9), hsla(340, 100%, 50%, 0.9));
+    padding: var(--space-lg) var(--space-2xl);
+    border-radius: var(--radius-lg);
+    z-index: 2500;
+    text-align: center;
+    animation: sabotageToastIn 0.3s ease, sabotageToastOut 0.3s ease 1.5s forwards;
+    box-shadow: 0 0 50px hsla(280, 100%, 50%, 0.5);
+}
+
+.sabotage-toast .toast-emoji {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: var(--space-sm);
+    animation: toastEmojiBounce 0.5s ease;
+}
+
+.sabotage-toast .toast-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+}
+
+.sabotage-toast .toast-sender {
+    font-size: 0.8rem;
+    color: hsla(0, 0%, 100%, 0.7);
+    margin-top: var(--space-xs);
+}
+
+@keyframes sabotageToastIn {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes sabotageToastOut {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+}
+
+@keyframes toastEmojiBounce {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+}
+
+/* Points Earned Animation */
+.points-earned {
+    position: fixed;
+    pointer-events: none;
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-success);
+    text-shadow: 0 0 10px var(--accent-success);
+    animation: pointsFloat 1s ease-out forwards;
+    z-index: 1000;
+}
+
+@keyframes pointsFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+}
