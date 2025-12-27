@@ -9,7 +9,7 @@
     --bg-primary: hsl(230, 25%, 7%);
     --bg-secondary: hsl(230, 20%, 12%);
     --bg-tertiary: hsl(230, 18%, 18%);
-    
+
     /* Accent Colors */
     --accent-primary: hsl(340, 100%, 60%);
     --accent-secondary: hsl(280, 100%, 65%);
@@ -17,28 +17,28 @@
     --accent-success: hsl(150, 80%, 45%);
     --accent-warning: hsl(40, 100%, 55%);
     --accent-danger: hsl(0, 85%, 55%);
-    
+
     /* Text Colors */
     --text-primary: hsl(0, 0%, 98%);
     --text-secondary: hsl(230, 15%, 70%);
     --text-muted: hsl(230, 10%, 50%);
-    
+
     /* Glass Effect */
     --glass-bg: hsla(230, 25%, 15%, 0.6);
     --glass-border: hsla(0, 0%, 100%, 0.1);
     --glass-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.4);
-    
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
     --gradient-glow: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
     --gradient-bg: radial-gradient(ellipse at 50% 0%, hsla(280, 80%, 30%, 0.3) 0%, transparent 60%),
-                   radial-gradient(ellipse at 80% 50%, hsla(340, 80%, 30%, 0.2) 0%, transparent 50%),
-                   radial-gradient(ellipse at 20% 80%, hsla(200, 80%, 30%, 0.2) 0%, transparent 50%);
-    
+        radial-gradient(ellipse at 80% 50%, hsla(340, 80%, 30%, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 80%, hsla(200, 80%, 30%, 0.2) 0%, transparent 50%);
+
     /* Typography */
     --font-primary: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-    
+
     /* Spacing */
     --space-xs: 0.25rem;
     --space-sm: 0.5rem;
@@ -46,13 +46,13 @@
     --space-lg: 1.5rem;
     --space-xl: 2rem;
     --space-2xl: 3rem;
-    
+
     /* Border Radius */
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 20px;
     --radius-full: 9999px;
-    
+
     /* Transitions */
     --transition-fast: 150ms ease;
     --transition-base: 250ms ease;
@@ -60,7 +60,9 @@
 }
 
 /* -------------------- Reset & Base -------------------- */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -92,8 +94,15 @@ body {
 }
 
 @keyframes bgPulse {
-    0% { opacity: 0.8; transform: scale(1); }
-    100% { opacity: 1; transform: scale(1.1); }
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
 }
 
 .bg-particles {
@@ -115,10 +124,23 @@ body {
 }
 
 @keyframes float {
-    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-    10% { opacity: 0.3; }
-    90% { opacity: 0.3; }
-    100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.3;
+    }
+
+    90% {
+        opacity: 0.3;
+    }
+
+    100% {
+        transform: translateY(-100vh) rotate(720deg);
+        opacity: 0;
+    }
 }
 
 /* -------------------- Container -------------------- */
@@ -154,8 +176,15 @@ body {
 }
 
 @keyframes bombShake {
-    0%, 100% { transform: rotate(-3deg); }
-    50% { transform: rotate(3deg); }
+
+    0%,
+    100% {
+        transform: rotate(-3deg);
+    }
+
+    50% {
+        transform: rotate(3deg);
+    }
 }
 
 .fuse-spark {
@@ -168,13 +197,20 @@ body {
     border-radius: 50%;
     animation: sparkle 0.5s ease-in-out infinite alternate;
     box-shadow: 0 0 10px var(--accent-warning),
-                0 0 20px var(--accent-warning),
-                0 0 30px var(--accent-danger);
+        0 0 20px var(--accent-warning),
+        0 0 30px var(--accent-danger);
 }
 
 @keyframes sparkle {
-    0% { transform: scale(0.8); opacity: 0.6; }
-    100% { transform: scale(1.2); opacity: 1; }
+    0% {
+        transform: scale(0.8);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
 }
 
 .logo-text {
@@ -237,13 +273,27 @@ body {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
 }
 
 @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
 }
 
 /* -------------------- Screen Management -------------------- */
@@ -262,6 +312,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -469,8 +520,13 @@ body {
 }
 
 @keyframes codeGlow {
-    0% { text-shadow: 0 0 20px hsla(200, 100%, 55%, 0.3); }
-    100% { text-shadow: 0 0 30px hsla(200, 100%, 55%, 0.6); }
+    0% {
+        text-shadow: 0 0 20px hsla(200, 100%, 55%, 0.3);
+    }
+
+    100% {
+        text-shadow: 0 0 30px hsla(200, 100%, 55%, 0.6);
+    }
 }
 
 .copy-btn {
@@ -535,7 +591,7 @@ body {
     transform: translateX(-50%);
 }
 
-.code-input:focus + .input-underline {
+.code-input:focus+.input-underline {
     width: 100%;
 }
 
@@ -597,6 +653,7 @@ body {
         opacity: 0;
         transform: translateX(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -653,7 +710,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* -------------------- Toast Notifications -------------------- */
@@ -699,6 +758,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -710,6 +770,7 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+
     to {
         opacity: 0;
         transform: translateY(-20px);
@@ -721,23 +782,23 @@ body {
     .container {
         padding: var(--space-md);
     }
-    
+
     .glass-card {
         padding: var(--space-lg);
     }
-    
+
     .logo-text {
         font-size: 2rem;
     }
-    
+
     .bomb-emoji {
         font-size: 3rem;
     }
-    
+
     .room-code {
         font-size: 2rem;
     }
-    
+
     .code-input {
         font-size: 2rem;
     }
@@ -758,4 +819,429 @@ body {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* ==================== GAME SCREEN STYLES ==================== */
+
+/* Bomb Timer */
+.bomb-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-lg);
+}
+
+.bomb-timer {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bomb-icon {
+    position: absolute;
+    font-size: 3rem;
+    z-index: 2;
+    animation: bombPulse 0.5s ease-in-out infinite alternate;
+}
+
+.bomb-timer.danger .bomb-icon {
+    animation: bombShake 0.1s ease-in-out infinite;
+}
+
+@keyframes bombPulse {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.1);
+    }
+}
+
+.timer-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.timer-ring svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.timer-bg {
+    fill: none;
+    stroke: var(--bg-tertiary);
+    stroke-width: 8;
+}
+
+.timer-progress {
+    fill: none;
+    stroke: url(#timerGradient);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 283;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.1s linear, stroke 0.3s ease;
+}
+
+.bomb-timer.danger .timer-progress {
+    stroke: var(--accent-danger);
+}
+
+.timer-text {
+    position: absolute;
+    bottom: -10px;
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.bomb-timer.danger .timer-text {
+    color: var(--accent-danger);
+    animation: blink 0.3s infinite;
+}
+
+/* Syllable Display */
+.syllable-container {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+}
+
+.syllable-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.syllable {
+    font-family: var(--font-mono);
+    font-size: 3rem;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 30px hsla(340, 100%, 50%, 0.3);
+    animation: syllablePop 0.3s ease;
+}
+
+@keyframes syllablePop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Word Input */
+.word-input-container {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.word-input {
+    flex: 1;
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: all var(--transition-base);
+    text-transform: uppercase;
+}
+
+.word-input:focus {
+    border-color: var(--accent-tertiary);
+    box-shadow: 0 0 20px hsla(200, 100%, 55%, 0.2);
+}
+
+.word-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.word-input::placeholder {
+    color: var(--text-muted);
+    text-transform: none;
+}
+
+.submit-btn {
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.submit-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+}
+
+.submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Word Feedback */
+.word-feedback {
+    text-align: center;
+    font-size: 0.9rem;
+    min-height: 1.5rem;
+    margin-bottom: var(--space-lg);
+    font-weight: 500;
+}
+
+.word-feedback.success {
+    color: var(--accent-success);
+}
+
+.word-feedback.error {
+    color: var(--accent-danger);
+}
+
+/* Turn Indicator */
+.turn-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+}
+
+.turn-indicator.your-turn {
+    border-color: var(--accent-success);
+    background: hsla(150, 80%, 45%, 0.1);
+}
+
+.turn-avatar {
+    font-size: 1.5rem;
+}
+
+.turn-name {
+    font-weight: 600;
+    color: var(--accent-tertiary);
+}
+
+.turn-label {
+    color: var(--text-secondary);
+}
+
+/* Players Bar */
+.players-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    justify-content: center;
+}
+
+.player-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-md);
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    min-width: 80px;
+    transition: all var(--transition-base);
+}
+
+.player-card.active {
+    border-color: var(--accent-tertiary);
+    box-shadow: 0 0 15px hsla(200, 100%, 55%, 0.3);
+}
+
+.player-card.eliminated {
+    opacity: 0.4;
+    filter: grayscale(1);
+}
+
+.player-card .avatar {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-xs);
+}
+
+.player-card .name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-card .lives {
+    display: flex;
+    gap: 2px;
+    margin-top: var(--space-xs);
+}
+
+.player-card .life {
+    width: 8px;
+    height: 8px;
+    background: var(--accent-danger);
+    border-radius: 50%;
+}
+
+.player-card .life.lost {
+    background: var(--bg-tertiary);
+}
+
+/* Game Over Screen */
+.game-over-card {
+    text-align: center;
+}
+
+.winner-crown {
+    font-size: 4rem;
+    margin-bottom: var(--space-md);
+    animation: crownBounce 1s ease infinite;
+}
+
+@keyframes crownBounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.winner-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-tertiary);
+    margin-bottom: var(--space-xl);
+}
+
+.final-stats {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-xl);
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Explosion Overlay */
+.explosion-overlay {
+    position: fixed;
+    inset: 0;
+    background: hsla(0, 0%, 0%, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: explosionFlash 0.1s ease;
+}
+
+.explosion-overlay.active {
+    display: flex;
+}
+
+@keyframes explosionFlash {
+    0% {
+        background: hsla(30, 100%, 50%, 0.8);
+    }
+
+    100% {
+        background: hsla(0, 0%, 0%, 0.9);
+    }
+}
+
+.explosion-content {
+    text-align: center;
+    animation: explosionZoom 0.5s ease;
+}
+
+@keyframes explosionZoom {
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.explosion-emoji {
+    font-size: 8rem;
+    animation: explosionShake 0.5s ease;
+}
+
+@keyframes explosionShake {
+
+    0%,
+    100% {
+        transform: rotate(0);
+    }
+
+    25% {
+        transform: rotate(-10deg);
+    }
+
+    75% {
+        transform: rotate(10deg);
+    }
+}
+
+.explosion-text {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--accent-danger);
+    text-shadow: 0 0 30px var(--accent-danger);
+}
+
+.explosion-player {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-md);
 }

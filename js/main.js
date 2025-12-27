@@ -1,6 +1,6 @@
 /**
  * Main Application - Panic Typer
- * Connects UI with NetworkManager
+ * Connects UI with NetworkManager and GameManager
  */
 
 // DOM Elements
@@ -10,6 +10,8 @@ const elements = {
 	hostScreen: document.getElementById('hostScreen'),
 	joinScreen: document.getElementById('joinScreen'),
 	lobbyScreen: document.getElementById('lobbyScreen'),
+	gameScreen: document.getElementById('gameScreen'),
+	gameOverScreen: document.getElementById('gameOverScreen'),
 
 	// Connection Status
 	connectionStatus: document.getElementById('connectionStatus'),
@@ -36,6 +38,30 @@ const elements = {
 	lobbyPlayersList: document.getElementById('lobbyPlayersList'),
 	leaveBtn: document.getElementById('leaveBtn'),
 
+	// Game Screen
+	bombTimer: document.getElementById('bombTimer'),
+	timerProgress: document.getElementById('timerProgress'),
+	timerText: document.getElementById('timerText'),
+	currentSyllable: document.getElementById('currentSyllable'),
+	wordInput: document.getElementById('wordInput'),
+	submitWordBtn: document.getElementById('submitWordBtn'),
+	wordFeedback: document.getElementById('wordFeedback'),
+	turnIndicator: document.getElementById('turnIndicator'),
+	turnAvatar: document.getElementById('turnAvatar'),
+	turnName: document.getElementById('turnName'),
+	playersBar: document.getElementById('playersBar'),
+
+	// Game Over Screen
+	winnerTitle: document.getElementById('winnerTitle'),
+	winnerName: document.getElementById('winnerName'),
+	wordsUsedStat: document.getElementById('wordsUsedStat'),
+	playAgainBtn: document.getElementById('playAgainBtn'),
+	exitGameBtn: document.getElementById('exitGameBtn'),
+
+	// Explosion Overlay
+	explosionOverlay: document.getElementById('explosionOverlay'),
+	explosionPlayer: document.getElementById('explosionPlayer'),
+
 	// Toast Container
 	toastContainer: document.getElementById('toastContainer'),
 
@@ -43,8 +69,11 @@ const elements = {
 	particles: document.getElementById('particles')
 };
 
-// Network Manager Instance
+// Global instances
 const network = new NetworkManager();
+let game = null; // Only initialized on host
+let myPlayerId = null;
+let currentGameState = null;
 
 // ==================== Screen Management ====================
 
@@ -88,9 +117,7 @@ function showToast(message, type = 'info') {
 	toast.textContent = message;
 	elements.toastContainer.appendChild(toast);
 
-	setTimeout(() => {
-		toast.remove();
-	}, 3000);
+	setTimeout(() => toast.remove(), 3000);
 }
 
 // ==================== Player List Rendering ====================
@@ -109,7 +136,6 @@ function renderPlayersList(container, players, isHost = false) {
 		container.appendChild(li);
 	});
 
-	// Update start button state (need at least 2 players)
 	if (isHost) {
 		elements.startGameBtn.disabled = players.length < 2;
 	}
@@ -119,6 +145,111 @@ function escapeHtml(text) {
 	const div = document.createElement('div');
 	div.textContent = text;
 	return div.innerHTML;
+}
+
+// ==================== Game UI Updates ====================
+
+function updateGameUI(state) {
+	if (!state) return;
+
+	currentGameState = state;
+
+	// Update syllable
+	elements.currentSyllable.textContent = state.currentSyllable;
+
+	// Update timer
+	const timeSeconds = (state.timeRemaining / 1000).toFixed(1);
+	elements.timerText.textContent = timeSeconds;
+
+	// Update timer ring
+	const progress = state.timeRemaining / state.maxTime;
+	const circumference = 2 * Math.PI * 45; // r=45
+	const offset = circumference * (1 - progress);
+	elements.timerProgress.style.strokeDashoffset = offset;
+
+	// Danger mode when < 3 seconds
+	if (state.timeRemaining < 3000) {
+		elements.bombTimer.classList.add('danger');
+	} else {
+		elements.bombTimer.classList.remove('danger');
+	}
+
+	// Update turn indicator
+	const currentPlayer = state.players[state.currentPlayerIndex];
+	if (currentPlayer) {
+		elements.turnAvatar.textContent = currentPlayer.isHost ? '👑' : '🎮';
+		elements.turnName.textContent = currentPlayer.name;
+
+		const isMyTurn = currentPlayer.id === myPlayerId;
+		elements.turnIndicator.classList.toggle('your-turn', isMyTurn);
+		elements.wordInput.disabled = !isMyTurn;
+		elements.submitWordBtn.disabled = !isMyTurn;
+
+		if (isMyTurn) {
+			elements.wordInput.focus();
+		}
+	}
+
+	// Update players bar
+	renderPlayersBar(state.players, state.currentPlayerIndex);
+}
+
+function renderPlayersBar(players, currentIndex) {
+	elements.playersBar.innerHTML = '';
+
+	players.forEach((player, index) => {
+		const card = document.createElement('div');
+		card.className = 'player-card';
+		if (index === currentIndex) card.classList.add('active');
+		if (player.isEliminated) card.classList.add('eliminated');
+
+		// Lives display
+		let livesHtml = '<div class="lives">';
+		for (let i = 0; i < 3; i++) {
+			livesHtml += `<div class="life ${i >= player.lives ? 'lost' : ''}"></div>`;
+		}
+		livesHtml += '</div>';
+
+		card.innerHTML = `
+            <div class="avatar">${player.isHost ? '👑' : '🎮'}</div>
+            <div class="name">${escapeHtml(player.name)}</div>
+            ${livesHtml}
+        `;
+
+		elements.playersBar.appendChild(card);
+	});
+}
+
+function showExplosion(playerName) {
+	elements.explosionPlayer.textContent = `${playerName} lost a life!`;
+	elements.explosionOverlay.classList.add('active');
+
+	setTimeout(() => {
+		elements.explosionOverlay.classList.remove('active');
+	}, 2000);
+}
+
+function showWordFeedback(message, isSuccess) {
+	elements.wordFeedback.textContent = message;
+	elements.wordFeedback.className = `word-feedback ${isSuccess ? 'success' : 'error'}`;
+
+	setTimeout(() => {
+		elements.wordFeedback.textContent = '';
+		elements.wordFeedback.className = 'word-feedback';
+	}, 2000);
+}
+
+function showGameOver(winner, wordsUsed) {
+	if (winner) {
+		elements.winnerTitle.textContent = '🏆 Winner!';
+		elements.winnerName.textContent = winner.name;
+	} else {
+		elements.winnerTitle.textContent = 'Game Over';
+		elements.winnerName.textContent = 'No winner';
+	}
+
+	elements.wordsUsedStat.textContent = wordsUsed || 0;
+	showScreen('gameOverScreen');
 }
 
 // ==================== Background Particles ====================
@@ -134,11 +265,31 @@ function createParticles() {
 		particle.style.animationDelay = `${Math.random() * 20}s`;
 		particle.style.animationDuration = `${15 + Math.random() * 10}s`;
 
-		// Random colors
 		const colors = ['hsl(340, 100%, 60%)', 'hsl(280, 100%, 65%)', 'hsl(200, 100%, 55%)'];
 		particle.style.background = colors[Math.floor(Math.random() * colors.length)];
 
 		container.appendChild(particle);
+	}
+}
+
+// ==================== Word Submission ====================
+
+function submitWord() {
+	const word = elements.wordInput.value.trim().toUpperCase();
+
+	if (!word) return;
+
+	if (network.isHost && game) {
+		// Host validates locally
+		const result = game.handleWordSubmission(word, myPlayerId);
+		showWordFeedback(result.reason, result.valid);
+		if (result.valid) {
+			elements.wordInput.value = '';
+		}
+	} else {
+		// Client sends to host
+		network.sendGameMessage(NetworkManager.MessageType.INPUT, { word });
+		elements.wordInput.value = '';
 	}
 }
 
@@ -148,10 +299,16 @@ function createParticles() {
 elements.hostBtn.addEventListener('click', async () => {
 	try {
 		const roomCode = await network.hostGame('Host');
+		myPlayerId = network.peer.id;
 		elements.roomCode.textContent = roomCode;
 		showScreen('hostScreen');
 		renderPlayersList(elements.playersList, network.getPlayers(), true);
 		showToast('Room created successfully!', 'success');
+
+		// Initialize GameManager for host
+		game = new GameManager(network);
+		await game.loadDictionary();
+		console.log('[Main] GameManager initialized');
 	} catch (error) {
 		showToast(error.message || 'Failed to create room', 'error');
 	}
@@ -194,6 +351,7 @@ elements.connectBtn.addEventListener('click', async () => {
 
 	try {
 		await network.joinGame(code, 'Player');
+		myPlayerId = network.peer.id;
 		elements.lobbyRoomCode.textContent = code;
 		showScreen('lobbyScreen');
 		showToast('Joined room successfully!', 'success');
@@ -217,6 +375,7 @@ elements.copyCodeBtn.addEventListener('click', async () => {
 // Back Buttons
 elements.hostBackBtn.addEventListener('click', () => {
 	network.disconnect();
+	game = null;
 	showScreen('roleScreen');
 });
 
@@ -232,11 +391,88 @@ elements.leaveBtn.addEventListener('click', () => {
 	showToast('Left the room', 'info');
 });
 
-// Start Game Button (placeholder for Phase 2)
+// Start Game Button
 elements.startGameBtn.addEventListener('click', () => {
-	showToast('Game starting... (Coming in Phase 2)', 'info');
-	network.sendGameMessage(NetworkManager.MessageType.START_GAME, {});
+	if (!game || !network.isHost) return;
+
+	// Initialize game with current players
+	game.initGame(network.getPlayers());
+
+	// Setup game callbacks
+	setupGameCallbacks();
+
+	// Start the game
+	if (game.startGame()) {
+		showScreen('gameScreen');
+		showToast('Game started!', 'success');
+
+		// Notify all clients
+		network.broadcast(NetworkManager.MessageType.START_GAME, {});
+	} else {
+		showToast('Failed to start game', 'error');
+	}
 });
+
+// Word Input
+elements.wordInput.addEventListener('keypress', (e) => {
+	if (e.key === 'Enter') {
+		submitWord();
+	}
+});
+
+elements.submitWordBtn.addEventListener('click', submitWord);
+
+// Play Again Button
+elements.playAgainBtn.addEventListener('click', () => {
+	if (network.isHost && game) {
+		game.initGame(network.getPlayers());
+		game.startGame();
+		showScreen('gameScreen');
+		network.broadcast(NetworkManager.MessageType.START_GAME, {});
+	}
+});
+
+// Exit Game Button
+elements.exitGameBtn.addEventListener('click', () => {
+	if (network.isHost) {
+		game?.reset();
+		showScreen('hostScreen');
+		renderPlayersList(elements.playersList, network.getPlayers(), true);
+	} else {
+		showScreen('lobbyScreen');
+	}
+});
+
+// ==================== Game Callbacks (Host Only) ====================
+
+function setupGameCallbacks() {
+	game.on('onStateUpdate', (state) => {
+		updateGameUI(state);
+	});
+
+	game.on('onExplosion', (player) => {
+		showExplosion(player.name);
+		network.broadcast('EXPLOSION', { playerName: player.name });
+	});
+
+	game.on('onGameOver', (winner) => {
+		showGameOver(winner, game.state.usedWords.size);
+		network.broadcast('GAME_OVER', {
+			winner: winner ? { name: winner.name } : null,
+			wordsUsed: game.state.usedWords.size
+		});
+	});
+
+	game.on('onWordValidated', (word, result, playerId) => {
+		if (!result.valid) {
+			// Send feedback to the player who submitted
+			const conn = network.connections.get(playerId);
+			if (conn) {
+				network.send(conn, 'WORD_RESULT', { word, ...result });
+			}
+		}
+	});
+}
 
 // ==================== Network Callbacks ====================
 
@@ -274,9 +510,42 @@ network.on('onError', (error) => {
 network.on('onMessage', (type, payload, sender) => {
 	console.log(`[Main] Received ${type}:`, payload);
 
-	// Handle game messages (Phase 2+)
-	if (type === NetworkManager.MessageType.START_GAME) {
-		showToast('Game is starting!', 'info');
+	switch (type) {
+		case NetworkManager.MessageType.START_GAME:
+			// Client receives start game signal
+			showScreen('gameScreen');
+			showToast('Game is starting!', 'info');
+			break;
+
+		case NetworkManager.MessageType.GAME_STATE:
+			// Client receives game state
+			updateGameUI(payload);
+			break;
+
+		case NetworkManager.MessageType.INPUT:
+			// Host receives word submission from client
+			if (network.isHost && game) {
+				const result = game.handleWordSubmission(payload.word, sender);
+				// Send result back to client
+				const conn = network.connections.get(sender);
+				if (conn) {
+					network.send(conn, 'WORD_RESULT', { word: payload.word, ...result });
+				}
+			}
+			break;
+
+		case 'WORD_RESULT':
+			// Client receives word validation result
+			showWordFeedback(payload.reason, payload.valid);
+			break;
+
+		case 'EXPLOSION':
+			showExplosion(payload.playerName);
+			break;
+
+		case 'GAME_OVER':
+			showGameOver(payload.winner, payload.wordsUsed);
+			break;
 	}
 });
 
@@ -285,12 +554,13 @@ network.on('onMessage', (type, payload, sender) => {
 function init() {
 	createParticles();
 	updateConnectionStatus(NetworkManager.ConnectionState.DISCONNECTED);
-	console.log('[Panic Typer] Phase 1 - Network Foundation Ready');
+	console.log('[Panic Typer] Phase 2 - Game Loop Ready');
 }
 
 // Handle page unload
 window.addEventListener('beforeunload', () => {
 	network.destroy();
+	game?.reset();
 });
 
 // Start the app

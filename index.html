@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Panic Typer - A fast-paced multiplayer word typing game with sabotage mechanics. Race against the clock and your friends!">
+    <meta name="description"
+        content="Panic Typer - A fast-paced multiplayer word typing game with sabotage mechanics. Race against the clock and your friends!">
     <title>Panic Typer | Multiplayer Word Game</title>
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
     <!-- Styles -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
     <!-- Animated Background -->
     <div class="bg-gradient"></div>
     <div class="bg-particles" id="particles"></div>
-    
+
     <!-- Main Container -->
     <main class="container">
         <!-- Logo Section -->
@@ -45,14 +50,14 @@
             <div class="card glass-card">
                 <h2 class="card-title">Choose Your Role</h2>
                 <p class="card-subtitle">Host a new game or join an existing one</p>
-                
+
                 <div class="button-group">
                     <button class="btn btn-primary btn-glow" id="hostBtn">
                         <span class="btn-icon">🎮</span>
                         <span class="btn-text">Host Game</span>
                         <span class="btn-desc">Create a new room</span>
                     </button>
-                    
+
                     <button class="btn btn-secondary" id="joinBtn">
                         <span class="btn-icon">🔗</span>
                         <span class="btn-text">Join Game</span>
@@ -68,17 +73,17 @@
                 <button class="back-btn" id="hostBackBtn">
                     <span>←</span> Back
                 </button>
-                
+
                 <h2 class="card-title">Room Created!</h2>
                 <p class="card-subtitle">Share this code with your friends</p>
-                
+
                 <div class="room-code-container">
                     <div class="room-code" id="roomCode">----</div>
                     <button class="copy-btn" id="copyCodeBtn" title="Copy to clipboard">
                         📋
                     </button>
                 </div>
-                
+
                 <div class="players-section">
                     <h3 class="section-title">
                         <span class="pulse-dot"></span>
@@ -92,7 +97,7 @@
                         </li>
                     </ul>
                 </div>
-                
+
                 <button class="btn btn-primary btn-glow btn-full" id="startGameBtn" disabled>
                     <span class="btn-icon">🚀</span>
                     <span class="btn-text">Start Game</span>
@@ -106,23 +111,18 @@
                 <button class="back-btn" id="joinBackBtn">
                     <span>←</span> Back
                 </button>
-                
+
                 <h2 class="card-title">Join a Room</h2>
                 <p class="card-subtitle">Enter the 4-letter room code</p>
-                
+
                 <div class="code-input-container">
-                    <input type="text" 
-                           class="code-input" 
-                           id="codeInput" 
-                           maxlength="4" 
-                           placeholder="XXXX"
-                           autocomplete="off"
-                           spellcheck="false">
+                    <input type="text" class="code-input" id="codeInput" maxlength="4" placeholder="XXXX"
+                        autocomplete="off" spellcheck="false">
                     <div class="input-underline"></div>
                 </div>
-                
+
                 <p class="error-message" id="joinError"></p>
-                
+
                 <button class="btn btn-primary btn-glow btn-full" id="connectBtn" disabled>
                     <span class="btn-icon">⚡</span>
                     <span class="btn-text">Connect</span>
@@ -135,16 +135,16 @@
             <div class="card glass-card">
                 <h2 class="card-title">Waiting for Host</h2>
                 <p class="card-subtitle">Game will start soon...</p>
-                
+
                 <div class="room-code-container small">
                     <span class="room-label">Room:</span>
                     <div class="room-code" id="lobbyRoomCode">----</div>
                 </div>
-                
+
                 <div class="loading-spinner">
                     <div class="spinner"></div>
                 </div>
-                
+
                 <div class="players-section">
                     <h3 class="section-title">
                         <span class="pulse-dot"></span>
@@ -154,23 +154,113 @@
                         <!-- Players will be added dynamically -->
                     </ul>
                 </div>
-                
+
                 <button class="btn btn-danger btn-full" id="leaveBtn">
                     <span class="btn-icon">🚪</span>
                     <span class="btn-text">Leave Room</span>
                 </button>
             </div>
         </section>
+
+        <!-- Game Screen -->
+        <section class="screen" id="gameScreen">
+            <!-- Bomb Timer -->
+            <div class="bomb-container">
+                <div class="bomb-timer" id="bombTimer">
+                    <div class="bomb-icon">💣</div>
+                    <div class="timer-ring">
+                        <svg viewBox="0 0 100 100">
+                            <defs>
+                                <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:hsl(340, 100%, 60%)" />
+                                    <stop offset="100%" style="stop-color:hsl(280, 100%, 65%)" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="timer-bg" cx="50" cy="50" r="45" />
+                            <circle class="timer-progress" id="timerProgress" cx="50" cy="50" r="45"
+                                stroke="url(#timerGradient)" />
+                        </svg>
+                    </div>
+                    <div class="timer-text" id="timerText">10.0</div>
+                </div>
+            </div>
+
+            <!-- Syllable Display -->
+            <div class="syllable-container">
+                <span class="syllable-label">Type a word containing:</span>
+                <div class="syllable" id="currentSyllable">ING</div>
+            </div>
+
+            <!-- Word Input -->
+            <div class="word-input-container">
+                <input type="text" class="word-input" id="wordInput" placeholder="Type your word..." autocomplete="off"
+                    spellcheck="false" disabled>
+                <button class="submit-btn" id="submitWordBtn" disabled>
+                    <span>⏎</span>
+                </button>
+            </div>
+            <p class="word-feedback" id="wordFeedback"></p>
+
+            <!-- Current Turn Indicator -->
+            <div class="turn-indicator" id="turnIndicator">
+                <span class="turn-avatar" id="turnAvatar">🎮</span>
+                <span class="turn-name" id="turnName">Player 1</span>
+                <span class="turn-label">is typing...</span>
+            </div>
+
+            <!-- Players Bar -->
+            <div class="players-bar" id="playersBar">
+                <!-- Player cards added dynamically -->
+            </div>
+        </section>
+
+        <!-- Game Over Screen -->
+        <section class="screen" id="gameOverScreen">
+            <div class="card glass-card game-over-card">
+                <div class="winner-crown">👑</div>
+                <h2 class="card-title" id="winnerTitle">Winner!</h2>
+                <p class="winner-name" id="winnerName">Player 1</p>
+
+                <div class="final-stats" id="finalStats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="wordsUsedStat">0</span>
+                        <span class="stat-label">Words Used</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-glow btn-full" id="playAgainBtn">
+                    <span class="btn-icon">🔄</span>
+                    <span class="btn-text">Play Again</span>
+                </button>
+
+                <button class="btn btn-secondary btn-full" id="exitGameBtn">
+                    <span class="btn-icon">🚪</span>
+                    <span class="btn-text">Exit to Lobby</span>
+                </button>
+            </div>
+        </section>
     </main>
+
+    <!-- Explosion Overlay -->
+    <div class="explosion-overlay" id="explosionOverlay">
+        <div class="explosion-content">
+            <div class="explosion-emoji">💥</div>
+            <div class="explosion-text">BOOM!</div>
+            <div class="explosion-player" id="explosionPlayer"></div>
+        </div>
+    </div>
 
     <!-- Toast Notifications -->
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- PeerJS Library -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    
+
     <!-- Application Scripts -->
+    <script src="js/dictionary.js"></script>
     <script src="js/NetworkManager.js"></script>
+    <script src="js/GameManager.js"></script>
     <script src="js/main.js"></script>
 </body>
+
 </html>
