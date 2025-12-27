@@ -1,6 +1,7 @@
 /**
  * Main Application - Panic Typer
- * Connects UI with NetworkManager and GameManager
+ * Connects UI with NetworkManager, GameManager, and SabotageSystem
+ * Phase 3: Sabotage System Integration
  */
 
 // DOM Elements
@@ -51,6 +52,12 @@ const elements = {
 	turnName: document.getElementById('turnName'),
 	playersBar: document.getElementById('playersBar'),
 
+	// Sabotage Shop (Phase 3)
+	sabotageShop: document.getElementById('sabotageShop'),
+	chaosPoints: document.getElementById('chaosPoints'),
+	shopItems: document.getElementById('shopItems'),
+	activeEffects: document.getElementById('activeEffects'),
+
 	// Game Over Screen
 	winnerTitle: document.getElementById('winnerTitle'),
 	winnerName: document.getElementById('winnerName'),
@@ -71,7 +78,8 @@ const elements = {
 
 // Global instances
 const network = new NetworkManager();
-let game = null; // Only initialized on host
+const sabotage = new SabotageSystem();
+let game = null;
 let myPlayerId = null;
 let currentGameState = null;
 
@@ -82,6 +90,12 @@ function showScreen(screenId) {
 		screen.classList.remove('active');
 	});
 	document.getElementById(screenId).classList.add('active');
+
+	// Initialize sabotage system when game screen shows
+	if (screenId === 'gameScreen') {
+		sabotage.init();
+		renderSabotageShop();
+	}
 }
 
 // ==================== Connection Status ====================
@@ -163,7 +177,7 @@ function updateGameUI(state) {
 
 	// Update timer ring
 	const progress = state.timeRemaining / state.maxTime;
-	const circumference = 2 * Math.PI * 45; // r=45
+	const circumference = 2 * Math.PI * 45;
 	const offset = circumference * (1 - progress);
 	elements.timerProgress.style.strokeDashoffset = offset;
 
@@ -188,6 +202,9 @@ function updateGameUI(state) {
 		if (isMyTurn) {
 			elements.wordInput.focus();
 		}
+
+		// Update sabotage shop visibility (can't sabotage when it's your turn)
+		updateSabotageShopState(!isMyTurn);
 	}
 
 	// Update players bar
@@ -203,7 +220,6 @@ function renderPlayersBar(players, currentIndex) {
 		if (index === currentIndex) card.classList.add('active');
 		if (player.isEliminated) card.classList.add('eliminated');
 
-		// Lives display
 		let livesHtml = '<div class="lives">';
 		for (let i = 0; i < 3; i++) {
 			livesHtml += `<div class="life ${i >= player.lives ? 'lost' : ''}"></div>`;
@@ -252,6 +268,137 @@ function showGameOver(winner, wordsUsed) {
 	showScreen('gameOverScreen');
 }
 
+// ==================== Phase 3: Sabotage System ====================
+
+function renderSabotageShop() {
+	elements.shopItems.innerHTML = '';
+
+	const sabotages = sabotage.getAllSabotages();
+
+	sabotages.forEach(sab => {
+		const btn = document.createElement('button');
+		btn.className = 'sabotage-btn';
+		btn.dataset.sabotageId = sab.id;
+		btn.title = sab.description;
+
+		btn.innerHTML = `
+            <span class="sabotage-emoji">${sab.emoji}</span>
+            <span class="sabotage-name">${sab.name}</span>
+            <span class="sabotage-cost">${sab.cost}</span>
+        `;
+
+		btn.addEventListener('click', () => useSabotage(sab.id));
+
+		elements.shopItems.appendChild(btn);
+	});
+
+	updateSabotageShopState(true);
+}
+
+function updateSabotageShopState(canUse) {
+	const buttons = elements.shopItems.querySelectorAll('.sabotage-btn');
+
+	buttons.forEach(btn => {
+		const sabotageId = btn.dataset.sabotageId;
+		const canAfford = sabotage.canAfford(sabotageId);
+
+		btn.disabled = !canUse || !canAfford;
+		btn.classList.toggle('affordable', canAfford);
+	});
+}
+
+function updateChaosPointsDisplay(points, delta) {
+	elements.chaosPoints.textContent = points;
+
+	// Show floating points animation for earned points
+	if (delta > 0) {
+		showPointsEarned(delta);
+	}
+}
+
+function showPointsEarned(points) {
+	const floater = document.createElement('div');
+	floater.className = 'points-earned';
+	floater.textContent = `+${points} 💀`;
+
+	// Position near the word input
+	const inputRect = elements.wordInput.getBoundingClientRect();
+	floater.style.left = `${inputRect.left + inputRect.width / 2}px`;
+	floater.style.top = `${inputRect.top}px`;
+
+	document.body.appendChild(floater);
+
+	setTimeout(() => floater.remove(), 1000);
+}
+
+function useSabotage(sabotageId) {
+	if (!currentGameState) return;
+
+	const currentPlayer = currentGameState.players[currentGameState.currentPlayerIndex];
+
+	// Can't sabotage yourself
+	if (currentPlayer.id === myPlayerId) {
+		showToast("Can't sabotage yourself!", 'error');
+		return;
+	}
+
+	// Check if can afford
+	if (!sabotage.canAfford(sabotageId)) {
+		showToast("Not enough Chaos Points!", 'error');
+		return;
+	}
+
+	// Spend points
+	sabotage.spendPoints(sabotageId);
+
+	// Send sabotage to host for forwarding
+	network.sendGameMessage(NetworkManager.MessageType.SABOTAGE, {
+		sabotageId,
+		target: currentPlayer.id,
+		senderName: network.isHost ? 'Host' : 'Player'
+	});
+
+	showToast(`Sent ${sabotage.getSabotageById(sabotageId).name}!`, 'success');
+	updateSabotageShopState(true);
+}
+
+function showSabotageIncoming(sabotageInfo, senderName) {
+	// Show dramatic toast
+	const toast = document.createElement('div');
+	toast.className = 'sabotage-toast';
+	toast.innerHTML = `
+        <span class="toast-emoji">${sabotageInfo.emoji}</span>
+        <span class="toast-text">${sabotageInfo.name}!</span>
+        <span class="toast-sender">from ${senderName}</span>
+    `;
+
+	document.body.appendChild(toast);
+	setTimeout(() => toast.remove(), 2000);
+
+	// Apply the effect
+	sabotage.applySabotage(sabotageInfo.id);
+
+	// Show active effect badge
+	showActiveEffect(sabotageInfo);
+}
+
+function showActiveEffect(sabotageInfo) {
+	const badge = document.createElement('div');
+	badge.className = 'effect-badge';
+	badge.dataset.effectId = sabotageInfo.id;
+	badge.innerHTML = `
+        <span class="effect-emoji">${sabotageInfo.emoji}</span>
+        <span>${sabotageInfo.name}</span>
+    `;
+
+	elements.activeEffects.appendChild(badge);
+}
+
+function removeActiveEffect(sabotageId) {
+	const badge = elements.activeEffects.querySelector(`[data-effect-id="${sabotageId}"]`);
+	if (badge) badge.remove();
+}
+
 // ==================== Background Particles ====================
 
 function createParticles() {
@@ -285,6 +432,8 @@ function submitWord() {
 		showWordFeedback(result.reason, result.valid);
 		if (result.valid) {
 			elements.wordInput.value = '';
+			// Award chaos points
+			const points = sabotage.awardPoints(word);
 		}
 	} else {
 		// Client sends to host
@@ -376,17 +525,20 @@ elements.copyCodeBtn.addEventListener('click', async () => {
 elements.hostBackBtn.addEventListener('click', () => {
 	network.disconnect();
 	game = null;
+	sabotage.reset();
 	showScreen('roleScreen');
 });
 
 elements.joinBackBtn.addEventListener('click', () => {
 	network.disconnect();
+	sabotage.reset();
 	showScreen('roleScreen');
 });
 
 // Leave Button
 elements.leaveBtn.addEventListener('click', () => {
 	network.disconnect();
+	sabotage.reset();
 	showScreen('roleScreen');
 	showToast('Left the room', 'info');
 });
@@ -400,6 +552,9 @@ elements.startGameBtn.addEventListener('click', () => {
 
 	// Setup game callbacks
 	setupGameCallbacks();
+
+	// Reset sabotage system
+	sabotage.reset();
 
 	// Start the game
 	if (game.startGame()) {
@@ -426,6 +581,7 @@ elements.submitWordBtn.addEventListener('click', submitWord);
 elements.playAgainBtn.addEventListener('click', () => {
 	if (network.isHost && game) {
 		game.initGame(network.getPlayers());
+		sabotage.reset();
 		game.startGame();
 		showScreen('gameScreen');
 		network.broadcast(NetworkManager.MessageType.START_GAME, {});
@@ -434,6 +590,9 @@ elements.playAgainBtn.addEventListener('click', () => {
 
 // Exit Game Button
 elements.exitGameBtn.addEventListener('click', () => {
+	sabotage.reset();
+	sabotage.clearAllEffects();
+
 	if (network.isHost) {
 		game?.reset();
 		showScreen('hostScreen');
@@ -464,15 +623,34 @@ function setupGameCallbacks() {
 	});
 
 	game.on('onWordValidated', (word, result, playerId) => {
-		if (!result.valid) {
-			// Send feedback to the player who submitted
-			const conn = network.connections.get(playerId);
-			if (conn) {
-				network.send(conn, 'WORD_RESULT', { word, ...result });
-			}
+		// Send feedback to the player who submitted
+		const conn = network.connections.get(playerId);
+		if (conn) {
+			network.send(conn, 'WORD_RESULT', { word, ...result });
+		}
+
+		// If valid word from a client, send them their chaos points
+		if (result.valid && playerId !== myPlayerId) {
+			const pointsEarned = Math.max(1, word.length - 2) + (word.length >= 8 ? 5 : word.length >= 6 ? 2 : 0);
+			network.send(conn, 'CHAOS_POINTS', { points: pointsEarned });
+		}
+
+		// Host also earns points for valid words
+		if (result.valid && playerId === myPlayerId) {
+			sabotage.awardPoints(word);
 		}
 	});
 }
+
+// ==================== Sabotage Callbacks ====================
+
+sabotage.on('onChaosPointsChange', (points, delta) => {
+	updateChaosPointsDisplay(points, delta);
+});
+
+sabotage.on('onSabotageEnd', (sabotageId) => {
+	removeActiveEffect(sabotageId);
+});
 
 // ==================== Network Callbacks ====================
 
@@ -512,13 +690,12 @@ network.on('onMessage', (type, payload, sender) => {
 
 	switch (type) {
 		case NetworkManager.MessageType.START_GAME:
-			// Client receives start game signal
+			sabotage.reset();
 			showScreen('gameScreen');
 			showToast('Game is starting!', 'info');
 			break;
 
 		case NetworkManager.MessageType.GAME_STATE:
-			// Client receives game state
 			updateGameUI(payload);
 			break;
 
@@ -526,16 +703,57 @@ network.on('onMessage', (type, payload, sender) => {
 			// Host receives word submission from client
 			if (network.isHost && game) {
 				const result = game.handleWordSubmission(payload.word, sender);
-				// Send result back to client
 				const conn = network.connections.get(sender);
 				if (conn) {
 					network.send(conn, 'WORD_RESULT', { word: payload.word, ...result });
+
+					// Send chaos points if valid
+					if (result.valid) {
+						const pointsEarned = Math.max(1, payload.word.length - 2) +
+							(payload.word.length >= 8 ? 5 : payload.word.length >= 6 ? 2 : 0);
+						network.send(conn, 'CHAOS_POINTS', { points: pointsEarned });
+					}
 				}
 			}
 			break;
 
+		case NetworkManager.MessageType.SABOTAGE:
+			// Host receives sabotage request, forward to target
+			if (network.isHost) {
+				const targetId = payload.target;
+				const sabotageInfo = sabotage.getSabotageById(payload.sabotageId);
+
+				if (targetId === myPlayerId) {
+					// Host is the target
+					showSabotageIncoming(sabotageInfo, payload.senderName);
+				} else {
+					// Forward to target client
+					const targetConn = network.connections.get(targetId);
+					if (targetConn) {
+						network.send(targetConn, 'SABOTAGE_APPLY', {
+							sabotageId: payload.sabotageId,
+							senderName: payload.senderName
+						});
+					}
+				}
+			}
+			break;
+
+		case 'SABOTAGE_APPLY':
+			// Client receives sabotage to apply
+			const sabotageInfo = sabotage.getSabotageById(payload.sabotageId);
+			if (sabotageInfo) {
+				showSabotageIncoming(sabotageInfo, payload.senderName);
+			}
+			break;
+
+		case 'CHAOS_POINTS':
+			// Client receives chaos points award
+			sabotage.setChaosPoints(sabotage.chaosPoints + payload.points);
+			showPointsEarned(payload.points);
+			break;
+
 		case 'WORD_RESULT':
-			// Client receives word validation result
 			showWordFeedback(payload.reason, payload.valid);
 			break;
 
@@ -554,13 +772,14 @@ network.on('onMessage', (type, payload, sender) => {
 function init() {
 	createParticles();
 	updateConnectionStatus(NetworkManager.ConnectionState.DISCONNECTED);
-	console.log('[Panic Typer] Phase 2 - Game Loop Ready');
+	console.log('[Panic Typer] Phase 3 - Sabotage System Ready! 💥');
 }
 
 // Handle page unload
 window.addEventListener('beforeunload', () => {
 	network.destroy();
 	game?.reset();
+	sabotage.clearAllEffects();
 });
 
 // Start the app
