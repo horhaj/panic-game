@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Panic Typer - A fast-paced multiplayer word typing game with sabotage mechanics. Race against the clock and your friends!">
+    <title>Panic Typer | Multiplayer Word Game</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-gradient"></div>
+    <div class="bg-particles" id="particles"></div>
+    
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Logo Section -->
+        <header class="logo-section">
+            <div class="logo-icon">
+                <span class="bomb-emoji">💣</span>
+                <div class="fuse-spark"></div>
+            </div>
+            <h1 class="logo-text">
+                <span class="text-gradient">Panic</span>
+                <span class="text-accent">Typer</span>
+            </h1>
+            <p class="tagline">Type fast. Sabotage faster.</p>
+        </header>
+
+        <!-- Connection Status -->
+        <div class="connection-status" id="connectionStatus">
+            <span class="status-dot"></span>
+            <span class="status-text">Disconnected</span>
+        </div>
+
+        <!-- Role Selection Screen -->
+        <section class="screen active" id="roleScreen">
+            <div class="card glass-card">
+                <h2 class="card-title">Choose Your Role</h2>
+                <p class="card-subtitle">Host a new game or join an existing one</p>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary btn-glow" id="hostBtn">
+                        <span class="btn-icon">🎮</span>
+                        <span class="btn-text">Host Game</span>
+                        <span class="btn-desc">Create a new room</span>
+                    </button>
+                    
+                    <button class="btn btn-secondary" id="joinBtn">
+                        <span class="btn-icon">🔗</span>
+                        <span class="btn-text">Join Game</span>
+                        <span class="btn-desc">Enter room code</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Host Screen -->
+        <section class="screen" id="hostScreen">
+            <div class="card glass-card">
+                <button class="back-btn" id="hostBackBtn">
+                    <span>←</span> Back
+                </button>
+                
+                <h2 class="card-title">Room Created!</h2>
+                <p class="card-subtitle">Share this code with your friends</p>
+                
+                <div class="room-code-container">
+                    <div class="room-code" id="roomCode">----</div>
+                    <button class="copy-btn" id="copyCodeBtn" title="Copy to clipboard">
+                        📋
+                    </button>
+                </div>
+                
+                <div class="players-section">
+                    <h3 class="section-title">
+                        <span class="pulse-dot"></span>
+                        Connected Players
+                    </h3>
+                    <ul class="players-list" id="playersList">
+                        <li class="player-item host">
+                            <span class="player-avatar">👑</span>
+                            <span class="player-name">You (Host)</span>
+                            <span class="player-status ready">Ready</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <button class="btn btn-primary btn-glow btn-full" id="startGameBtn" disabled>
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">Start Game</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Join Screen -->
+        <section class="screen" id="joinScreen">
+            <div class="card glass-card">
+                <button class="back-btn" id="joinBackBtn">
+                    <span>←</span> Back
+                </button>
+                
+                <h2 class="card-title">Join a Room</h2>
+                <p class="card-subtitle">Enter the 4-letter room code</p>
+                
+                <div class="code-input-container">
+                    <input type="text" 
+                           class="code-input" 
+                           id="codeInput" 
+                           maxlength="4" 
+                           placeholder="XXXX"
+                           autocomplete="off"
+                           spellcheck="false">
+                    <div class="input-underline"></div>
+                </div>
+                
+                <p class="error-message" id="joinError"></p>
+                
+                <button class="btn btn-primary btn-glow btn-full" id="connectBtn" disabled>
+                    <span class="btn-icon">⚡</span>
+                    <span class="btn-text">Connect</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Lobby Screen (Client View) -->
+        <section class="screen" id="lobbyScreen">
+            <div class="card glass-card">
+                <h2 class="card-title">Waiting for Host</h2>
+                <p class="card-subtitle">Game will start soon...</p>
+                
+                <div class="room-code-container small">
+                    <span class="room-label">Room:</span>
+                    <div class="room-code" id="lobbyRoomCode">----</div>
+                </div>
+                
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                </div>
+                
+                <div class="players-section">
+                    <h3 class="section-title">
+                        <span class="pulse-dot"></span>
+                        Players in Lobby
+                    </h3>
+                    <ul class="players-list" id="lobbyPlayersList">
+                        <!-- Players will be added dynamically -->
+                    </ul>
+                </div>
+                
+                <button class="btn btn-danger btn-full" id="leaveBtn">
+                    <span class="btn-icon">🚪</span>
+                    <span class="btn-text">Leave Room</span>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- PeerJS Library -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    
+    <!-- Application Scripts -->
+    <script src="js/NetworkManager.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
